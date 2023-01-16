@@ -33,6 +33,7 @@ const Forms = () => {
     return files;
   }
 
+  // Storing files
   const storeFiles = async(files) => {
     const client = makeStorageClient()
     const cid = await client.put(files)
@@ -40,21 +41,27 @@ const Forms = () => {
     return cid
   }
 
+  // Retrieving files
   const retrieveFiles = async(cid) => {
     const client = makeStorageClient()
     const res = await client.get(cid)
     // const value = await res.files()
-    console.log(`Got a response! [${res.status}] ${res.ok}`)
+    // console.log(`Got a response! [${res.status}] ${res.ok}`)
     if (!res.ok) {
       console.log(`failed to get ${cid} - [${res.status}] ${res.body}`)
     }
   
     const files = await res.files()
     for (const file of files) {
-      console.log(`${file.cid} -- ${file.name} -- ${file.size}`)
+      // console.log(`${file.cid} -- ${file.name} -- ${file.size}`)
       const text = await file.text()
       const obj = JSON.parse(text)
-      console.log("text", text, obj)
+      console.log("Firstname:", obj.firstname)
+      console.log("Lasstname:", obj.lastname)
+      console.log("Reason:", obj.reasons)
+      console.log("Amount:", obj.amountgoal)
+      console.log("Comments:", obj.commentsfordonor)
+      // console.log("text", text, obj)
     }
   }
 
