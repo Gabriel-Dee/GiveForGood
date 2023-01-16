@@ -64,7 +64,7 @@ const Forms = () => {
       }
       console.log("Retrieved Data:", data)
     }
- 
+  }
 
     return (
       <section className={`${styles.container}`}>
@@ -99,6 +99,5 @@ const Forms = () => {
       </section>
     )
   
-}
 }
 export default Forms
