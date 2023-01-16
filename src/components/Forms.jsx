@@ -3,11 +3,21 @@ import React, { useState} from "react";
 import { Buffer } from "buffer";
 import { Web3Storage, getFilesFromPath, File } from 'web3.storage'
 
-
 const Forms = () => {
 
+  const [userDetails, setUserDetails] = useState({
+    firstName:'',
+    lastName:'',
+    reason:'',
+    amount:0,
+    comments:''
+  });
+
+  const [cid, setCid] = useState('')
+
+  const [loading, setLoading] = useState(false)
+
   const getAccessToken = () => {
-    // console.log(process.env.WEB3STORAGE_TOKEN)
     return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDY1MEU3NjRFMEM4NjAwQ2Q5QTQ1MTZENzJGMTFEOTM3NjViMjIyOTAiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2Njk1MDU4OTc4OTYsIm5hbWUiOiJtYWx1bHUifQ.tbHFCYkW0UH97BDcByYgOeznM8vsZSXbVuZolNooa8A';
   }
 
@@ -15,24 +25,19 @@ const Forms = () => {
     return new Web3Storage({token:getAccessToken()})
   }
 
-// This function takes only the data that i want to store ignoring the unneccesary
   const makeFileObjects = (userDetails) => {
     const obj = { 
       firstname: userDetails.firstName ,
       lastname: userDetails.lastName ,
-      reasons: userDetails.reason,
-      amountgoal: userDetails.amount,
-      commentsfordonor: userDetails.comments
-   }
+      reason: userDetails.reason,
+      amount: userDetails.amount,
+      comments: userDetails.comments
+    }
     const buffer = Buffer.from(JSON.stringify(obj))
-    const files = [
-      new File([buffer], `${userDetails.firstName} ${userDetails.lastName}`)
-    ]
+    const files = [new File([buffer], `${userDetails.firstName} ${userDetails.lastName}`)]
     return files;
   }
 
-
-  // Storing files
   const storeFiles = async(files) => {
     const client = makeStorageClient()
     const cid = await client.put(files)
@@ -40,14 +45,12 @@ const Forms = () => {
     return cid
   }
 
-  // The function returns specific data Iwant being retrieved
   const retrieveFiles = async(cid) => {
     const client = makeStorageClient()
     const res = await client.get(cid)
     if (!res.ok) {
       console.log(`failed to get ${cid} - [${res.status}] ${res.body}`)
     }
-  
     const files = await res.files()
     for (const file of files) {
       const text = await file.text()
@@ -55,74 +58,47 @@ const Forms = () => {
       const data = {
         firstname: obj.firstname,
         lastname: obj.lastname,
-        reason: obj.reasons,
-        amount: obj.amountgoal,
-        comments: obj.commentsfordonor
+        reason: obj.reason,
+        amount: obj.amount,
+        comments: obj.comments
       }
       console.log("Retrieved Data:", data)
     }
-  }
+ 
 
-
-    const [userDetails, setUserDetails] = useState({
-      firstName:'',
-      lastName:'',
-      reason:'',
-      amount:0,
-      comments:''
-    });
-
-    const [cid, setCid] = useState('')
-
-    const [loading, setLoading] = useState(false)
-
-    const handleSubmit = async (e) => {
-      setLoading(true)
-      e.preventDefault();
-      const data = makeFileObjects(userDetails)
-      console.log("user", userDetails)
-      const cidData = await storeFiles(data)
-      setLoading(false)
-      alert("User Registered Successfully")
-      setCid(cidData)
-      setUserDetails({
-        firstName:'',
-        lastName:'',
-        reason:'',
-        amount:0,
-        comments:''
-      })
-    }
-
-
-
-  return (
-    <section className={`${styles.flexCenter} ${styles.marginY} ${styles.padding} sm:flex-row flex-col bg-black-gradient-2 rounded-[20px] box-shadow w-1/2`}>
-      <div className="flex-1 flex flex-col">
-      {
-        loading?<p className="font-bold text-white">Loading...</p>:''
-      }
-      <h2 className={styles.heading2}>Apply for Fund.</h2>
+    return (
+      <section className={`${styles.container}`}>
         <form onSubmit={handleSubmit}>
-        <p className={`${styles.paragraph} max-w-[470px] mt-5`}>First name:</p>
-        <input value={userDetails.firstName} onChange={(e) => setUserDetails({...userDetails, firstName:e.target.value})} className="bg-dimWhite text-black p-2 rounded-sm font-poppins rounded-full cursor-pointer sm:w-[100%] border-[#3d4f7c]"/>
-        <p className={`${styles.paragraph} max-w-[470px] mt-5`}>Last name:</p>
-        <input value={userDetails.lastName} onChange={(e) => setUserDetails({...userDetails, lastName:e.target.value})} className="bg-dimWhite text-black p-2 rounded-sm font-poppins rounded-full cursor-pointer sm:w-[100%] border-[#3d4f7c]"/>
-        <p className={`${styles.paragraph} max-w-[470px] mt-5`}>Reason:</p>
-        <input value={userDetails.reason} onChange={(e) => setUserDetails({...userDetails, reason:e.target.value})} className="bg-dimWhite text-black p-2 rounded-sm font-poppins rounded-full cursor-pointer sm:w-[100%] border-[#3d4f7c]"/>
-        <p className={`${styles.paragraph} max-w-[470px] mt-5`}>Ammount goal (optional):</p>
-        <input value={userDetails.amount} onChange={(e) => setUserDetails({...userDetails, amount:e.target.value})} className="bg-dimWhite text-black p-2 rounded-sm font-poppins rounded-full cursor-pointer sm:w-[100%] border-[#3d4f7c]"/>
-
-        <p className={`${styles.paragraph} max-w-[470px] mt-5`}>Comments:</p>
-        <input value={userDetails.comments} onChange={(e) => setUserDetails({...userDetails, comments:e.target.value})} className="bg-dimWhite text-black p-2 rounded-sm font-poppins rounded-full cursor-pointer sm:w-[100%] border-[#3d4f7c]"/>
-        <div>
-          <button disabled={loading} onClick={handleSubmit} className={`py-4 mt-3 px-6 ${loading?'bg-dimWhite text-black':'bg-blue-gradient text-primary'} font-poppins font-medium text-[18px]  outline-none ${styles} rounded-[10px] `}>Submit</button>
-        </div>
+          <div>
+            <label>First Name</label>
+            <input type="text" value={userDetails.firstName} onChange={e => setUserDetails({...userDetails, firstName:e.target.value})} required/>
+          </div>
+          <div>
+            <label>Last Name</label>
+            <input type="text" value={userDetails.lastName} onChange={e => setUserDetails({...userDetails, lastName:e.target.value})} required/>
+          </div>
+          <div>
+            <label>Reason</label>
+            <input type="text" value={userDetails.reason} onChange={e => setUserDetails({...userDetails, reason:e.target.value})} required/>
+          </div>
+          <div>
+            <label>Amount</label>
+            <input type="number" value={userDetails.amount} onChange={e => setUserDetails({...userDetails, amount:e.target.value})} required/>
+          </div>
+          <div>
+            <label>Comments</label>
+            <textarea value={userDetails.comments} onChange={e => setUserDetails({...userDetails, comments:e.target.value})} required/>
+          </div>
+          <div>
+            <button type="submit" disabled={loading}>{loading ? 'Loading...' : 'Submit'}</button>
+          </div>
         </form>
-    </div>
-    
-    </section>
-  )
+        <div>
+          <button onClick={() => retrieveFiles(cid)}>Retrieve Data</button>
+        </div>
+      </section>
+    )
+  
 }
-
+}
 export default Forms
