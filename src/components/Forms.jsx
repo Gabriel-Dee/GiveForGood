@@ -15,8 +15,8 @@ const Forms = () => {
     return new Web3Storage({token:getAccessToken()})
   }
 
-
-  const makeFileObjects = () => {
+// This function takes only the data that i want to store ignoring the unneccesary
+  const makeFileObjects = (userDetails) => {
     const obj = { 
       firstname: userDetails.firstName ,
       lastname: userDetails.lastName ,
@@ -24,14 +24,13 @@ const Forms = () => {
       amountgoal: userDetails.amount,
       commentsfordonor: userDetails.comments
    }
-
     const buffer = Buffer.from(JSON.stringify(obj))
-
     const files = [
       new File([buffer], `${userDetails.firstName} ${userDetails.lastName}`)
     ]
     return files;
   }
+
 
   // Storing files
   const storeFiles = async(files) => {
@@ -41,29 +40,29 @@ const Forms = () => {
     return cid
   }
 
-  // Retrieving files
+  // The function returns specific data Iwant being retrieved
   const retrieveFiles = async(cid) => {
     const client = makeStorageClient()
     const res = await client.get(cid)
-    // const value = await res.files()
-    // console.log(`Got a response! [${res.status}] ${res.ok}`)
     if (!res.ok) {
       console.log(`failed to get ${cid} - [${res.status}] ${res.body}`)
     }
   
     const files = await res.files()
     for (const file of files) {
-      // console.log(`${file.cid} -- ${file.name} -- ${file.size}`)
       const text = await file.text()
       const obj = JSON.parse(text)
-      console.log("Firstname:", obj.firstname)
-      console.log("Lasstname:", obj.lastname)
-      console.log("Reason:", obj.reasons)
-      console.log("Amount:", obj.amountgoal)
-      console.log("Comments:", obj.commentsfordonor)
-      // console.log("text", text, obj)
+      const data = {
+        firstname: obj.firstname,
+        lastname: obj.lastname,
+        reason: obj.reasons,
+        amount: obj.amountgoal,
+        comments: obj.commentsfordonor
+      }
+      console.log("Retrieved Data:", data)
     }
   }
+
 
     const [userDetails, setUserDetails] = useState({
       firstName:'',
