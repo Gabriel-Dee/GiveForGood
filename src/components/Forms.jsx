@@ -45,27 +45,6 @@ const Forms = () => {
     return cid
   }
 
-  const retrieveFiles = async(cid) => {
-    const client = makeStorageClient()
-    const res = await client.get(cid)
-    if (!res.ok) {
-      console.log(`failed to get ${cid} - [${res.status}] ${res.body}`)
-    }
-    const files = await res.files()
-    for (const file of files) {
-      const text = await file.text()
-      const obj = JSON.parse(text)
-      const data = {
-        firstname: obj.firstname,
-        lastname: obj.lastname,
-        reason: obj.reason,
-        amount: obj.amount,
-        comments: obj.comments
-      }
-      console.log("Retrieved Data:", data)
-    }
-  }
-
     return (
       <section className={`${styles.container}`}>
         <form onSubmit={handleSubmit}>
@@ -100,4 +79,26 @@ const Forms = () => {
     )
   
 }
+
+export const retrieveFiles = async(cid) => {
+  const client = makeStorageClient()
+  const res = await client.get(cid)
+  if (!res.ok) {
+    console.log(`failed to get ${cid} - [${res.status}] ${res.body}`)
+  }
+  const files = await res.files()
+  for (const file of files) {
+    const text = await file.text()
+    const obj = JSON.parse(text)
+    const data = {
+      firstname: obj.firstname,
+      lastname: obj.lastname,
+      reason: obj.reason,
+      amount: obj.amount,
+      comments: obj.comments
+    }
+    console.log("Retrieved Data:", data)
+  }
+}
+
 export default Forms
